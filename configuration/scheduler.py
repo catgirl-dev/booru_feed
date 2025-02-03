@@ -5,7 +5,7 @@ def create_scheduler():
     return AsyncIOScheduler(
     jobstores={
         'default': SQLAlchemyJobStore(
-            url='sqlite:///scrapper_info.db'
+            url='sqlite:///fetcher_info.db'
         )
     }
 )

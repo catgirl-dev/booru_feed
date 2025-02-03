@@ -1,6 +1,6 @@
 from peewee import SqliteDatabase, Model, IntegerField, CharField
 
-db = SqliteDatabase('database/fetcher_info.db')
+db = SqliteDatabase('fetcher_info.db')
 
 
 class TagsArchive(Model):
