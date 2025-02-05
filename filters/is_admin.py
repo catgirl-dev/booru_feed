@@ -3,7 +3,7 @@ from aiogram.types import Message, User, Chat, ChatMember, ChatMemberOwner, Chat
 
 from configuration.environment import bot
 
-# Когда человек пишет от имени чата/канала, за него сообщения отправляет Chanel Bot
+# Когда человек пишет от имени чата/канала, за него сообщения отправляет Channel Bot
 CHANNEL_BOT_ID = 136817688
 
 

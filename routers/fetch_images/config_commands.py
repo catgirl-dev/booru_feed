@@ -9,7 +9,8 @@ from configuration.environment import scheduler
 from database.models import IntervalConfig, TagsArchive, CensorStatus
 from filters.is_admin import IsAdmin
 from filters.is_group import ChatTypeFilter
-from routers.fetch_images.fetch_media import fetch_new_media
+from routers.fetch_images.fetch_media import fetch_and_send_media
+from utils.queue import enqueue_urls
 
 fetch_config = Router()
 
@@ -39,7 +40,7 @@ async def start_fetch(message: Message):
         await message.reply('Ошибка при запуске бота')
         return
 
-    existing_job = scheduler.get_job(f'fetch_images_{message.chat.id}')
+    existing_job = scheduler.get_job(f'fetch_media_{message.chat.id}')
     if existing_job:
         await message.reply('Бот уже запущен.')
         return
@@ -47,8 +48,12 @@ async def start_fetch(message: Message):
     time = int(str(interval.time))
 
     scheduler.add_job(
-        fetch_new_media, 'interval',
-        minutes=time, id=f'fetch_images_{message.chat.id}'
+        fetch_and_send_media, 'interval',
+        minutes=time, id=f'fetch_media_{message.chat.id}'
+    )
+
+    scheduler.add_job(
+        enqueue_urls, 'interval', seconds=15, id=f'enqueue_urls_{message.chat.id}'
     )
 
     await message.reply(
@@ -59,7 +64,7 @@ async def start_fetch(message: Message):
 
 @fetch_config.message(Command('stop_fetch'), ChatTypeFilter(), IsAdmin())
 async def stop_fetch(message: Message):
-    job_id = f'fetch_images_{message.chat.id}'
+    job_id = f'fetch_media_{message.chat.id}'
     existing_job = scheduler.get_job(job_id)
 
     if not existing_job:
@@ -217,14 +222,14 @@ async def change_interval(message: Message, command: CommandObject):
     interval.time = new_interval
     interval.save()
 
-    existing_job = scheduler.get_job(f'fetch_images_{message.chat.id}')
+    existing_job = scheduler.get_job(f'fetch_media_{message.chat.id}')
     if existing_job:
         existing_job.remove()
 
     scheduler.add_job(
-        fetch_new_media, 'interval',
+        fetch_and_send_media, 'interval',
         minutes=new_interval,
-        id=f'fetch_images_{message.chat.id}'
+        id=f'fetch_media_{message.chat.id}'
     )
 
     await message.reply(

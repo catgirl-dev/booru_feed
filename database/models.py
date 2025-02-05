@@ -39,6 +39,7 @@ class CensorStatus(Model):
 class UrlQueue(Model):
     chat_id = IntegerField()
     url = CharField()
+    tag = CharField()
     status = IntegerField(default=0)  # 0 — в очереди, 1 — в обработке, выполнили — удаляем
 
     class Meta:
