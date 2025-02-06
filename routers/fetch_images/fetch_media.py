@@ -73,7 +73,7 @@ async def fetch_and_send_media() -> None:
 
                         await send_attachment(command)
                         # Задержка, чтобы избежать спам-алертов
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(2)
 
                     except TelegramBadRequest as error:
                         logging.info(error)

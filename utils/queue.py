@@ -24,7 +24,7 @@ def enqueue_urls() -> None:
                 ).first()
 
                 if existing_url:
-                    logging.info(f'URL уже в очереди или обработан: {url}')
+                    logging.debug(f'URL уже в очереди или обработан: {url}')
 
                     if existing_url.status == 1:
                         existing_url.status = 0

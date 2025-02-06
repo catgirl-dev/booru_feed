@@ -21,6 +21,10 @@ class SendAttachCommand:
         self.has_spoiler = has_spoiler
         self.chat_id = chat_id
 
+class CensorLevel(Enum):
+    NO_CENSOR = 0
+    PARTIAL_CENSOR = 1
+    FULL_CENSOR = 2
 
 def get_send_command(post: any, chat_id: any) -> Union[SendAttachCommand, None]:
     censor_status_found = CensorStatus.select().where(CensorStatus.chat_id == chat_id).first()
@@ -38,14 +42,17 @@ def get_send_command(post: any, chat_id: any) -> Union[SendAttachCommand, None]:
     else:
         att_type = AttachmentType.PHOTO
 
-    if current_censor_status == 1:
-        # Questionable (q), Explicit (e), Sensitive (s)
-        hs = post['rating'] in ['q', 'e', 's']
-    elif current_censor_status == 0:
+    # Questionable (q), Explicit (e), Sensitive (s)
+    censored_ratings = {'q', 'e', 's'}
+
+    if current_censor_status == CensorLevel.PARTIAL_CENSOR:
+        hs = post['rating'] in censored_ratings
+    elif current_censor_status == CensorLevel.FULL_CENSOR:
         hs = False
     else:
-        logging.info('Выключен поиск 18+')
-        return None
+        if post['rating'] in censored_ratings:
+            return None
+        hs = False
 
     return SendAttachCommand(att_type, post['file_url'], hs, chat_id)
 
