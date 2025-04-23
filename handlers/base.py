@@ -13,7 +13,7 @@ async def ping(message: Message):
 
 
 @base.message(Command('help'))
-async def heelp(message: Message):
+async def help_command(message: Message):
     await message.reply(
         help_msg.help_msg,
         parse_mode='Markdown',

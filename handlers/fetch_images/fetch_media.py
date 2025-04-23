@@ -9,7 +9,7 @@ from aiohttp import ClientSession
 from peewee import Query
 
 from database.models import TagsArchive, PostIds, UrlQueue
-from routers.fetch_images.send_attachment import AttachmentType, get_send_command, send_attachment
+from handlers.fetch_images.send_attachment import AttachmentType, get_send_command, send_attachment
 from utils.queue import dequeue_and_get_urls
 from utils.resize_image import resize_problematic_image
 from utils.update_database import update_database

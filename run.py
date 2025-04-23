@@ -1,11 +1,11 @@
 import asyncio
 
 from configuration.environment import scheduler, dp, bot
-from routers.base import base
-from routers.fetch_images.config_commands import fetch_config
-from routers.fetch_images.fetch_media import fetch_and_send
+from handlers.base import base
+from handlers.fetch_images.config_commands import fetch_config
+from handlers.fetch_images.fetch_media import fetch_and_send
 
-from routers.lifecycle import lifecycle
+from handlers.lifecycle import lifecycle
 from configuration.logging import setup_logging
 
 

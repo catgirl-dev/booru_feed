@@ -9,7 +9,7 @@ from configuration.environment import scheduler
 from database.models import IntervalConfig, TagsArchive, CensorStatus
 from filters.is_admin import IsAdmin
 from filters.is_group import ChatTypeFilter
-from routers.fetch_images.fetch_media import fetch_and_send_media
+from handlers.fetch_images.fetch_media import fetch_and_send_media
 from utils.queue import enqueue_urls
 
 fetch_config = Router()
