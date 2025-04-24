@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from datetime import datetime
 
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
@@ -8,29 +7,26 @@ from aiogram.types import BufferedInputFile
 from aiohttp import ClientSession
 from peewee import Query
 
-from database.models import TagsArchive, PostIds, UrlQueue
+from database.models import PostIds, UrlQueue
 from handlers.fetch_images.send_attachment import AttachmentType, get_send_command, send_attachment
+from utils.database_operations import update_database, get_chat_ids
+from utils.fetch_media_utils import construct_url, construct_isoformat_date
 from utils.queue import dequeue_and_get_urls
 from utils.resize_image import resize_problematic_image
-from utils.update_database import update_database
 
 fetch_and_send = Router()
 
 async def fetch_and_send_media() -> None:
     async with ClientSession() as session:
-        chat_ids: Query = TagsArchive.select(TagsArchive.chat_id).distinct()
-        chat_id_list: list[int] = [int(chat_id.chat_id) for chat_id in chat_ids]
+        chat_id_list = get_chat_ids()
 
         for chat_id in chat_id_list:
             urls = dequeue_and_get_urls(chat_id)
             if not urls:
                 continue
 
-            for url_record in urls:
-                url = url_record.url
-                tag = url_record.tag
-                logging.info(f"Запрос к Danbooru: {url}")
-                await asyncio.sleep(1)
+            for url in urls:
+                url, tag = await construct_url(url)
 
                 async with session.get(url) as response:
                     if response.status != 200:
@@ -47,16 +43,14 @@ async def fetch_and_send_media() -> None:
                         logging.info('not data')
                         continue
 
-                post_ids: Query = PostIds.select().where(PostIds.chat_id == chat_id)
+                post_ids = PostIds.select().where(PostIds.chat_id == chat_id)
                 post_lst: list[int] = []
-
                 for post_id in post_ids:
                     post_lst.append(int(post_id.post_id))
 
                 # В респонсе приходят изображения от нового (0) к старому (19)
                 for post in data[::-1]:
-                    iso_post_date: datetime = datetime.fromisoformat(post['created_at'])
-                    formatted_post_date: str = str(iso_post_date.strftime("%Y-%m-%dT%H:%M:%S"))
+                    formatted_post_date = construct_isoformat_date(post)
 
                     if 'file_url' not in post or int(post['id']) in post_lst:
                         logging.warning(
@@ -66,17 +60,14 @@ async def fetch_and_send_media() -> None:
 
                     try:
                         command = get_send_command(post, chat_id)
-
                         if not command:
-                            logging.info('not command')
+                            logging.info('Not command')
                             continue
-
                         await send_attachment(command)
                         # Задержка, чтобы избежать спам-алертов
                         await asyncio.sleep(2)
-
                     except TelegramBadRequest as error:
-                        logging.info(error)
+                        logging.error(error)
 
                         if command.attachmentType == AttachmentType.PHOTO:
                             logging.info("Меняем размер проблемного изображения")
@@ -101,5 +92,5 @@ async def fetch_and_send_media() -> None:
                             else:
                                 logging.error("Тип не не является строкой")
 
-                logging.info(f"Обновление базы данных для чата {chat_id} и тега {tag}")
                 await update_database(chat_id, tag, post, formatted_post_date, url)
+                logging.info(f"Обновлена база данных для чата {chat_id} и тега {tag}")

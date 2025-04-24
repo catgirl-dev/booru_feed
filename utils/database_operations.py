@@ -1,6 +1,13 @@
 import logging
+from typing import List
 
 from database.models import TagsArchive, PostIds, UrlQueue
+
+
+def get_chat_ids() -> List[int]:
+    chat_ids = TagsArchive.select(TagsArchive.chat_id).distinct()
+    chat_id_list: list[int] = [int(chat_id.chat_id) for chat_id in chat_ids]
+    return chat_id_list
 
 
 async def update_database(chat_id: int, tag, post, formatted_post_date: str, url: str) -> None:
