@@ -45,16 +45,26 @@ async def start_fetch(message: Message):
         await message.reply('Бот уже запущен.')
         return
 
-    time = int(str(interval.time))
+    try:
+        time = int(str(interval.time))
 
-    scheduler.add_job(
-        fetch_and_send_media, 'interval',
-        minutes=time, id=f'fetch_media_{message.chat.id}'
-    )
+        scheduler.add_job(
+            fetch_and_send_media, 'interval',
+            minutes=time, id=f'fetch_media_{message.chat.id}'
+        )
+    except Exception as e:
+        logging.error(f"Ошибка при создании джоба на отправку медиа{e}")
 
-    scheduler.add_job(
-        enqueue_urls, 'interval', seconds=15, id=f'enqueue_urls_{message.chat.id}'
-    )
+    try:
+        existing_queue = scheduler.get_job(f'enqueue_urls_{message.chat.id}')
+        if existing_queue:
+            return
+        else:
+            scheduler.add_job(
+                enqueue_urls, 'interval', seconds=15, id=f'enqueue_urls_{message.chat.id}'
+            )
+    except Exception as e:
+        logging.error(f"Ошибка при добавлении джоба очереди {e}")
 
     await message.reply(
         f'Поиск новых медиа начат! Каждые {time} минут(ы) '

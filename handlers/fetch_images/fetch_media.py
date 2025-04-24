@@ -89,6 +89,9 @@ async def fetch_and_send_media() -> None:
                                         command.file = BufferedInputFile(file=image_bytes,
                                                                          filename="resized_image.jpg")
                                         await send_attachment(command)
+                                        # Задержка, чтобы избежать спам-алертов
+                                        await asyncio.sleep(2)
+
                                     except TelegramBadRequest as resize_error:
                                         logging.error(
                                             f"Ошибка при отправке ресайзнутого изображения: {resize_error}")
