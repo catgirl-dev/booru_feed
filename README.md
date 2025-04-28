@@ -71,8 +71,8 @@ cd booru_feed
 Перед установкой зависимостей рекомендуется использовать виртуальное окружение.
 #### Linux/MacOS
 ```sh
-python -m venv venv           # создание виртуального окружения
-source venv/bin/activate      # активация окружения
+python -m venv venv              # создание виртуального окружения
+source venv/bin/activate         # активация окружения
 pip install -r requirements.txt  # установка зависимостей
 ```
 
