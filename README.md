@@ -54,9 +54,36 @@
 
 **Пример:** для включения цензуры введите `/censor_status 1`
 
-## 🚀 Установка
+## 🐋 Установка через Docker
 ### Требования
+- Установленный [Docker](https://docs.docker.com/get-started/get-docker/)
+### Скачивание образа из Docker Hub
+[catgirldev/booru_feed](https://hub.docker.com/r/catgirldev/booru_feed)
+### Конфигурация
+Создание и переход в директорию проекта:
+```sh
+mkdir booru_feed && cd booru_feed
+```
+Создание .env файла (необходимо получить токен бота у BotFather в Telegram):
+```sh
+curl -O https://raw.githubusercontent.com/catgirl-dev/booru_feed/main/env.example .env
+nano .env  # Вставьте токен бота и настройки. Удалите кавычки
+```
+### Запуск контейнера
+```sh
+docker run -d \
+  --restart always \
+  --name booru_feed \
+  --env-file .env \
+  catgirldev/booru_feed
+```
+Проверка логов бота:
+```sh
+docker logs booru_feed
+```
 
+## 🚀 Локальный запуск
+### Требования
 - Python 3.8+
 - `pip`
   
